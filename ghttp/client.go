@@ -1,6 +1,7 @@
 package ghttp
 
 import (
+	"bytes"
 	"crypto/tls"
 	"errors"
 	"io/ioutil"
@@ -42,7 +43,7 @@ func NewClient(m ...Middleware) *Client {
 			},
 		},
 	}
-	c.handler = basicHttpDo(c, nil)
+	c.handler = basicHttpDo(c)
 	c.Use(m...)
 	return c
 }
@@ -82,7 +83,7 @@ func (c *Client) Do(req *Request) *Response {
 	return res
 }
 
-func basicHttpDo(c *Client, next Handler) Handler {
+func basicHttpDo(c *Client) Handler {
 	return func(req *Request) *Response {
 		resp := &Response{
 			Req:  req,
@@ -101,6 +102,7 @@ func basicHttpDo(c *Client, next Handler) Handler {
 			return resp
 		}
 		resp.Err = resp.DecodeAndParse()
+		resp.Response.Body = ioutil.NopCloser(bytes.NewBuffer(resp.Body))
 		return resp
 	}
 }
