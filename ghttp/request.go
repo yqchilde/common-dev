@@ -74,143 +74,154 @@ func Patch(url string) *Request {
 	return NewRequest("PATCH", url)
 }
 
-func (r *Request) addContextValue(k, v interface{}) *Request {
-	r.Request = r.WithContext(context.WithValue(r.Request.Context(), k, v))
-	return r
+func (req *Request) addContextValue(k, v interface{}) *Request {
+	req.Request = req.WithContext(context.WithValue(req.Request.Context(), k, v))
+	return req
 }
 
-func (r *Request) SetDebug(d bool) *Request {
-	r.Debug = d
-	return r
+func (req *Request) SetDebug(d bool) *Request {
+	req.Debug = d
+	return req
 }
 
-func (r *Request) SetTimeout(t time.Duration) *Request {
-	ctx, _ := context.WithTimeout(r.Context(), t)
-	r.Request = r.WithContext(ctx)
-	return r
+func (req *Request) SetTimeout(t time.Duration) *Request {
+	ctx, _ := context.WithTimeout(req.Context(), t)
+	req.Request = req.WithContext(ctx)
+	return req
 }
 
-func (r *Request) AddCookie(c *http.Cookie) *Request {
-	r.Request.AddCookie(c)
-	return r
+func (req *Request) AddCookie(c *http.Cookie) *Request {
+	req.Request.AddCookie(c)
+	return req
 }
 
-func (r *Request) AddCookies(cs ...*http.Cookie) *Request {
+func (req *Request) AddCookies(cs ...*http.Cookie) *Request {
 	for _, c := range cs {
-		r.Request.AddCookie(c)
+		req.Request.AddCookie(c)
 	}
-	return r
+	return req
 }
 
-func (r *Request) AddHeader(k, v string) *Request {
-	r.Request.Header.Add(k, v)
-	return r
+func (req *Request) AddHeader(k, v string) *Request {
+	req.Request.Header.Add(k, v)
+	return req
 }
 
-func (r *Request) AddHeaders(m map[string]string) *Request {
+func (req *Request) AddHeaders(m map[string]string) *Request {
 	for k, v := range m {
-		r.AddHeader(k, v)
+		req.AddHeader(k, v)
 	}
-	return r
+	return req
 }
 
-func (r *Request) AddParam(k, v string) *Request {
-	if len(r.Request.URL.RawQuery) > 0 {
-		r.Request.URL.RawQuery += "&"
+func (req *Request) AddParam(k, v string) *Request {
+	if len(req.Request.URL.RawQuery) > 0 {
+		req.Request.URL.RawQuery += "&"
 	}
-	r.Request.URL.RawQuery += url.QueryEscape(k) + "=" + url.QueryEscape(v)
-	return r
+	req.Request.URL.RawQuery += url.QueryEscape(k) + "=" + url.QueryEscape(v)
+	return req
 }
 
-func (r *Request) AddParams(m map[string]string) *Request {
+func (req *Request) AddParams(m map[string]string) *Request {
 	for k, v := range m {
-		r.AddParam(k, v)
+		req.AddParam(k, v)
 	}
-	return r
+	return req
 }
 
-func (r *Request) SetUA(ua string) *Request {
-	r.AddHeader("User-Agent", ua)
-	return r
+func (req *Request) SetUA(ua string) *Request {
+	req.AddHeader("User-Agent", ua)
+	return req
 }
 
-func (r *Request) SetBasicAuth(username, password string) *Request {
-	r.Request.SetBasicAuth(username, password)
-	return r
+func (req *Request) SetBasicAuth(username, password string) *Request {
+	req.Request.SetBasicAuth(username, password)
+	return req
 }
 
-func (r *Request) SetBody(b io.Reader) *Request {
-	rc, ok := b.(io.ReadCloser)
-	if !ok && b != nil {
-		rc = ioutil.NopCloser(b)
+func (req *Request) SetBody(body io.Reader) *Request {
+	rc, ok := body.(io.ReadCloser)
+	if !ok && body != nil {
+		rc = ioutil.NopCloser(body)
 	}
-	r.Request.Body = rc
+	req.Request.Body = rc
 
-	switch v := b.(type) {
+	switch v := body.(type) {
 	case *bytes.Buffer:
-		r.ContentLength = int64(v.Len())
+		req.ContentLength = int64(v.Len())
 		buf := v.Bytes()
-		r.GetBody = func() (io.ReadCloser, error) {
-			reader := bytes.NewReader(buf)
-			return ioutil.NopCloser(reader), nil
+		req.GetBody = func() (io.ReadCloser, error) {
+			r := bytes.NewReader(buf)
+			return io.NopCloser(r), nil
 		}
 	case *bytes.Reader:
-		r.ContentLength = int64(v.Len())
-		r.GetBody = func() (io.ReadCloser, error) {
-			return ioutil.NopCloser(v), nil
+		req.ContentLength = int64(v.Len())
+		snapshot := *v
+		req.GetBody = func() (io.ReadCloser, error) {
+			r := snapshot
+			return io.NopCloser(&r), nil
 		}
 	case *strings.Reader:
-		r.ContentLength = int64(v.Len())
-		r.GetBody = func() (io.ReadCloser, error) {
-			return ioutil.NopCloser(v), nil
+		req.ContentLength = int64(v.Len())
+		snapshot := *v
+		req.GetBody = func() (io.ReadCloser, error) {
+			r := snapshot
+			return io.NopCloser(&r), nil
 		}
 	default:
 	}
 
-	return r
+	if req.GetBody != nil && req.ContentLength == 0 {
+		req.Body = http.NoBody
+		req.GetBody = func() (io.ReadCloser, error) {
+			return http.NoBody, nil
+		}
+	}
+
+	return req
 }
 
-func (r *Request) SetRawBody(b []byte) *Request {
-	r.SetBody(bytes.NewReader(b))
-	return r
+func (req *Request) SetRawBody(b []byte) *Request {
+	req.SetBody(bytes.NewReader(b))
+	return req
 }
 
-func (r *Request) SetFormBody(m map[string]string) *Request {
+func (req *Request) SetFormBody(m map[string]string) *Request {
 	var u url.URL
 	var q = u.Query()
 
 	for k, v := range m {
 		q.Add(k, v)
 	}
-	r.SetRawBody([]byte(q.Encode()))
-	r.AddHeader("Content-Type", "application/x-www-form-urlencoded")
+	req.SetRawBody([]byte(q.Encode()))
+	req.AddHeader("Content-Type", "application/x-www-form-urlencoded")
 
-	return r
+	return req
 }
 
-func (r *Request) SetJSONBody(v interface{}) *Request {
+func (req *Request) SetJsonBody(v interface{}) *Request {
 	body, err := json.Marshal(v)
-	r.SetRawBody(body)
-	r.Err = err
-	r.AddHeader("Content-Type", "application/json")
+	req.SetRawBody(body)
+	req.Err = err
+	req.AddHeader("Content-Type", "application/json")
 
-	return r
+	return req
 }
 
-func (r *Request) SetCallback(f func(resp *Response) *Response) *Request {
-	r.callback = f
-	return r
+func (req *Request) SetCallback(f func(resp *Response) *Response) *Request {
+	req.callback = f
+	return req
 }
 
-func (r *Request) SetClient(c *Client) *Request {
-	r.client = c
-	return r
+func (req *Request) SetClient(c *Client) *Request {
+	req.client = c
+	return req
 }
 
-func (r *Request) String() string {
-	return r.URL.String()
+func (req *Request) String() string {
+	return req.URL.String()
 }
 
-func (r *Request) Do() *Response {
-	return r.callback(r.client.Do(r))
+func (req *Request) Do() *Response {
+	return req.callback(req.client.Do(req))
 }
