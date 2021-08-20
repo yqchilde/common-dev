@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -142,7 +141,7 @@ func (req *Request) SetBasicAuth(username, password string) *Request {
 func (req *Request) SetBody(body io.Reader) *Request {
 	rc, ok := body.(io.ReadCloser)
 	if !ok && body != nil {
-		rc = ioutil.NopCloser(body)
+		rc = io.NopCloser(body)
 	}
 	req.Request.Body = rc
 
