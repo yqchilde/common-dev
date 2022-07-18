@@ -1,0 +1,48 @@
+version: "3"
+services:
+  embyserver:
+    image: xinjiawei1/emby_unlockd:latest
+    container_name: embyserver
+    restart: unless-stopped
+    environment:
+      - UID=0
+      - GID=0
+      - GIDLIST=0
+      - TZ=Asia/Hong_Kong
+      - LANG=en_US.UTF-8
+    volumes:
+      - ./emby/config:/config
+      - /mnt/aliyundrive:/media
+    ports:
+      - 8096:8096
+    devices:
+      - /dev/dri:/dev/dri
+
+  nginx:
+    image: nginx:alpine
+    container_name: embynginx
+    restart: always
+    ports:
+      - 8095:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/embyCache:/var/cache/nginx/emby
+    depends_on:
+      - embyserver
+
+  tmm:
+    image: dzhuang/tinymediamanager
+    container_name: tmm
+    extra_hosts:
+      - "api.themoviedb.org:65.9.86.99"
+    environment:
+      - GROUP_ID=1000
+      - USER_ID=0
+      - TZ=Asia/Hong_Kong
+      - LANG=en_US.UTF-8
+    ports:
+      - 5800:5800
+    volumes:
+      - ./tmm/config:/config
+      - /mnt/aliyundrive:/media
