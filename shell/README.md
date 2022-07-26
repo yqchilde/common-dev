@@ -19,4 +19,4 @@ for i in "${!multi_options[@]}"; do
 done
 ```
 
-![测试图片](https://github.com/yqchilde/common-dev/blob/main/shell/tests/multiSelect.gif?raw=true)
+<img src="https://github.com/yqchilde/common-dev/blob/main/shell/tests/multiSelect.gif?raw=true" width="450" height="345" alt="multiSelect"/><br/>
