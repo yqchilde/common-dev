@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# 单选菜单
 function singleSelect {
     cursor_blink_on() { printf "\033[?25h"; }       # 显示光标
     cursor_blink_off() { printf "\033[?25l"; }      # 隐藏光标
@@ -15,12 +16,23 @@ function singleSelect {
     local -n options=$1
     local -A selected
 
+    # 定义打印顺序，可自定义
+    if [ -z "$2" ]; then
+        local -a print_order
+        for key in "${!options[@]}"; do
+            print_order+=("$key")
+        done
+    else
+        local -n temp=$2
+        for key in "${temp[@]}"; do
+            print_order+=("$key")
+        done
+    fi
+
     # 标记选项状态
-    local idx=$((${#options[@]} - 1))
-    for key in "${!options[@]}"; do
-        selected[$idx]="$key"
+    for ((i = 0; i < ${#print_order[@]}; i++)); do
+        selected[$i]=${print_order[$i]}
         printf "\n"
-        ((idx--))
     done
 
     # 确定当前屏幕位置以覆盖选项
@@ -59,14 +71,14 @@ function singleSelect {
 
     # 打印勾选状态选项
     print_options() {
-        for ((i = 0; i < ${#options[@]}; i++)); do
+        for ((i = 0; i < ${#print_order[@]}; i++)); do
             local prefix="[ ]"
-            if [[ ${options[${selected[$i]}]} = true ]]; then
+            if [[ ${options[${print_order[$i]}]} = true ]]; then
                 prefix="[\e[38;5;46m>\e[0m]"
             fi
 
             cursor_to $((start_row + "$i"))
-            print_inactive "$prefix" "${selected[$i]}"
+            print_inactive "$prefix" "${print_order[$i]}"
         done
     }
 
