@@ -13,8 +13,8 @@ function multiSelect {
         echo "${ROW#*[}"
     }
 
-    declare -n options=$1
-    declare -A selected
+    local -n options=$1
+    local -A selected
 
     # 标记选项状态
     local idx=$((${#options[@]} - 1))
@@ -49,37 +49,33 @@ function multiSelect {
     # 设置选项选中状态
     toggle_option() {
         local idx=$1
-        if [[ ${options["${selected[$idx]}"]} = true ]]; then
-            options["${selected[$idx]}"]=false
+        if [[ ${options[${selected[$idx]}]} = true ]]; then
+            options[${selected[$idx]}]=false
         else
-            options["${selected[$idx]}"]=true
+            options[${selected[$idx]}]=true
         fi
-
-        #        printf "yubo: %s" "${options["${selected[$idx]}"]}"
     }
 
     # 打印勾选状态选项
     print_options() {
-        local idx=0
         for ((i = 0; i < ${#options[@]}; i++)); do
             local prefix="[ ]"
-            if [[ ${options["${selected[$idx]}"]} = true ]]; then
+            if [[ ${options[${selected[$i]}]} = true ]]; then
                 prefix="[\e[38;5;46m✔\e[0m]"
             fi
 
-            cursor_to $((start_row + idx))
-            if [ $idx -eq "$1" ]; then
-                print_active "$prefix" "${selected[$idx]}"
+            cursor_to $((start_row + "$i"))
+            if [ "$i" -eq "$1" ]; then
+                print_active "$prefix" "${selected[$i]}"
             else
-                print_inactive "$prefix" "${selected[$idx]}"
+                print_inactive "$prefix" "${selected[$i]}"
             fi
-            ((idx++))
         done
     }
 
     local active=0
     while true; do
-        print_options $active
+        print_options "$active"
 
         case $(key_input) in
         space) toggle_option $active ;;
