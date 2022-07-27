@@ -12,16 +12,15 @@ function singleSelect {
         echo "${ROW#*[}"
     }
 
-    local return_value=$1
-    local -n options=$2
-    local selected=()
+    local -n options=$1
+    local -A selected
 
-    for ((i = 0; i < ${#options[@]}; i++)); do
+    # 标记选项状态
+    local idx=$((${#options[@]} - 1))
+    for key in "${!options[@]}"; do
+        selected[$idx]="$key"
         printf "\n"
-    done
-
-    for f in "${selected[@]}"; do
-        echo "$f"
+        ((idx--))
     done
 
     # 确定当前屏幕位置以覆盖选项
@@ -29,8 +28,7 @@ function singleSelect {
     local last_row=${cursor_now_row}
     local start_row=$((last_row - ${#options[@]}))
 
-    # 确保在读取 -s 期间在 ctrl+c 上回显光标和输入
-    # ensure cursor and input echoing back on upon a ctrl+c during read -s
+    # 确保在read -s期间在ctrl+c上回显光标和输入
     trap "cursor_blink_on; stty echo; printf '\n'; exit" 2
     cursor_blink_off
 
@@ -42,41 +40,46 @@ function singleSelect {
         if [[ $key = $'\x20' ]]; then echo space; fi
         if [[ $key = $'\x1b' ]]; then
             read -rsn2 key
-            if [[ $key = [A || $key = k ]]; then echo up; fi
-            if [[ $key = [B || $key = j ]]; then echo down; fi
+            if [[ $key = [A ]]; then echo up; fi
+            if [[ $key = [B ]]; then echo down; fi
         fi
     }
 
     # 设置选项选中状态
     toggle_option() {
-        for ((i = 0; i < ${#options[@]}; i++)); do
-            if [[ $i = "$1" ]]; then
-                selected[$i]=true
+        local idx=$1
+        for key in "${!selected[@]}"; do
+            if [[ $key = "$idx" ]]; then
+                options["${selected[$key]}"]=true
             else
-                selected[$i]=false
+                options["${selected[$key]}"]=false
             fi
         done
     }
 
     # 打印勾选状态选项
     print_options() {
-        local idx=0
-        for option in "${options[@]}"; do
+        for ((i = 0; i < ${#options[@]}; i++)); do
             local prefix="[ ]"
-            if [[ ${selected[idx]} == true ]]; then
+            if [[ ${options[${selected[$i]}]} = true ]]; then
                 prefix="[\e[38;5;46m>\e[0m]"
             fi
 
-            cursor_to $((start_row + idx))
-            print_inactive "$prefix" "$option"
-            ((idx++))
+            cursor_to $((start_row + "$i"))
+            print_inactive "$prefix" "${selected[$i]}"
         done
     }
 
     local active=0
+    for key in "${!selected[@]}"; do
+        if [[ ${options[${selected[$key]}]} = true ]]; then
+            active="$key"
+            break
+        fi
+    done
     while true; do
         toggle_option "$active"
-        print_options $active
+        print_options "$active"
 
         case $(key_input) in
         enter)
@@ -85,12 +88,10 @@ function singleSelect {
             ;;
         up)
             ((active--))
-            toggle_option "$active"
             if [ "$active" -lt 0 ]; then active=$((${#options[@]} - 1)); fi
             ;;
         down)
             ((active++))
-            toggle_option "$active"
             if [ "$active" -ge ${#options[@]} ]; then active=0; fi
             ;;
         esac
@@ -100,17 +101,4 @@ function singleSelect {
     cursor_to "$last_row"
     printf "\n"
     cursor_blink_on
-
-    eval "$return_value"='("${selected[@]}")'
 }
-
-#my_options=("v1.1.1" "v1.1.2" "v1.1.3")
-
-#singleSelect result my_options
-#singleSelect "$1" "$2"
-
-#idx=0
-#for option in "${my_options[@]}"; do
-#    echo -e "$option\t=> ${result[idx]}"
-#    ((idx++))
-#done
