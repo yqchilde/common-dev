@@ -52,5 +52,5 @@ for i in "${!single_options[@]}"; do
 done
 ```
 
-<img src="https://github.com/yqchilde/common-dev/blob/main/shell/tests/singleSelect.gif?raw=true" width="450" height="345" alt="multiSelect"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://github.com/yqchilde/common-dev/blob/main/shell/tests/singleSelect_order.gif?raw=true" width="450" height="345" alt="multiSelect"/>
+<img src="https://github.com/yqchilde/common-dev/blob/main/shell/tests/singleSelect.gif?raw=true" width="500" height="360" alt="multiSelect"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://github.com/yqchilde/common-dev/blob/main/shell/tests/singleSelect_order.gif?raw=true" width="500" height="360" alt="multiSelect"/>
 
