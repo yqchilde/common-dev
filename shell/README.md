@@ -5,7 +5,9 @@
 
 ## 案例
 
-**多选菜单：**
+### 多选菜单
+
+**多选菜单(无序)：**
 ```shell
 source <(curl -sL https://raw.githubusercontents.com/yqchilde/common-dev/main/shell/multiSelect.sh)
 declare -A multi_options=(
@@ -19,7 +21,22 @@ for i in "${!multi_options[@]}"; do
 done
 ```
 
-<img src="https://github.com/yqchilde/common-dev/blob/main/shell/tests/multiSelect.gif?raw=true" width="450" height="345" alt="multiSelect"/><br/>
+**多选菜单(有序)：**
+```shell
+source <(curl -sL https://raw.githubusercontents.com/yqchilde/common-dev/main/shell/multiSelect.sh)
+declare -A multi_options=(
+    ["简体中文"]=true
+    ["繁體中文"]=false
+    ["English"]=false
+)
+order=("简体中文" "繁體中文" "English")
+multiSelect multi_options order
+for i in "${!multi_options[@]}"; do
+    printf "key: %s, val: %s\n" "$i" "${multi_options[$i]}"
+done
+```
+
+<img src="https://github.com/yqchilde/common-dev/blob/main/shell/tests/multiSelect.gif?raw=true" width="400" height="288" alt="multiSelect"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://github.com/yqchilde/common-dev/blob/main/shell/tests/multiSelect_order.gif?raw=true" width="400" height="288" alt="multiSelect"/>
 
 ### 单选菜单
 
