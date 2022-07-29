@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# 多选菜单
 function multiSelect {
     cursor_blink_on() { printf "\033[?25h"; }                    # 显示光标
     cursor_blink_off() { printf "\033[?25l"; }                   # 隐藏光标
@@ -107,6 +108,5 @@ function multiSelect {
 
     # 光标位置恢复正常
     cursor_to "$last_row"
-    printf "\n"
     cursor_blink_on
 }

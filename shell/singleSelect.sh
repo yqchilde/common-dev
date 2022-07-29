@@ -111,6 +111,5 @@ function singleSelect {
 
     # 光标位置恢复正常
     cursor_to "$last_row"
-    printf "\n"
     cursor_blink_on
 }
