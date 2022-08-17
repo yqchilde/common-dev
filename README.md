@@ -7,3 +7,4 @@
 - [x] [几个常用shell脚本](https://github.com/yqchilde/common-dev/tree/main/shell)
     - [x] 单选菜单
     - [x] 多选菜单
+    - [x] github加速
