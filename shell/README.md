@@ -2,6 +2,7 @@
 
 - [x] [多选菜单](https://github.com/yqchilde/common-dev/blob/main/shell/multiSelect.sh)
 - [x] [单选菜单](https://github.com/yqchilde/common-dev/blob/main/shell/singleSelect.sh)
+- [x] [github加速](https://github.com/yqchilde/common-dev/blob/main/shell/githubProxy.sh)
 
 ## 案例
 
@@ -71,3 +72,8 @@ done
 
 <img src="https://github.com/yqchilde/common-dev/blob/main/shell/tests/singleSelect.gif?raw=true" width="400" height="288" alt="multiSelect"/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://github.com/yqchilde/common-dev/blob/main/shell/tests/singleSelect_order.gif?raw=true" width="400" height="288" alt="multiSelect"/>
 
+### github加速
+脚本依赖于 [FastGithub](https://github.com/dotnetcore/FastGithub)，需要执行以下几个步骤：
+1. 将对应系统的二进制文件放在服务器
+2. cd /usr/bin && ln -s /fastGithub二进制文件路径 /usr/bin/fastGithub
+3. 将以上脚本单独写在文件中或者写入`.bashrc`里
