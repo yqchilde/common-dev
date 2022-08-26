@@ -2,6 +2,25 @@
 
 方案来自群佬，他的仓库地址 [https://github.com/zxcvbnmzsedr/docker_env/blob/master/emby/README.md](https://github.com/zxcvbnmzsedr/docker_env/blob/master/emby/README.md)
 
+## 挂载webdav
+
+使用 `rclone` 工具连接webdav，使用 `systemctl` 做开机自启，`rclone.service` 内容如下：
+
+```text
+[Unit]
+Description=rclone
+After=docker.service
+
+[Service]
+User=root
+# 这是注释，写入时删掉，`aliyun:/` 这一部分要按需变更，准确的话要改成rclone挂载盘的具体路径
+ExecStart=/usr/bin/rclone mount aliyun:/ /mnt/aliyundrive --allow-other --allow-non-empty --vfs-cache-mode writes
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+```
+
 ## 注意
 
 1. `docker-compose.yaml` 中挂载项 `- /mnt/aliyundrive:/media` ，要修改为自己的云盘挂载目录

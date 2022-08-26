@@ -9,7 +9,7 @@ services:
       - GID=0
       - GIDLIST=0
       - TZ=Asia/Hong_Kong
-      - LANG=en_US.UTF-8
+      - LANG=C.UTF-8
     volumes:
       - ./emby/config:/config
       - /mnt/aliyundrive:/media
@@ -40,7 +40,7 @@ services:
       - GROUP_ID=1000
       - USER_ID=0
       - TZ=Asia/Hong_Kong
-      - LANG=en_US.UTF-8
+      - LANG=C.UTF-8
     ports:
       - 5800:5800
     volumes:
