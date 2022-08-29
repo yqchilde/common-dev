@@ -52,8 +52,8 @@ function singleSelect {
         if [[ $key = $'\x20' ]]; then echo space; fi
         if [[ $key = $'\x1b' ]]; then
             read -rsn2 key
-            if [[ $key = [A ]]; then echo up; fi
-            if [[ $key = [B ]]; then echo down; fi
+            if [[ $key = "[A" ]]; then echo up; fi
+            if [[ $key = "[B" ]]; then echo down; fi
         fi
     }
 
