@@ -2,7 +2,7 @@
 
 async function redirect2Pan(r) {
     // 这里默认emby/jellyfin的地址是宿主机
-    const embyHost = 'http://192.168.31.7:8096';
+    const embyHost = 'http://192.168.31.5:8096';
 
     // rclone 的挂载目录, 在docker-compose中已将rclone挂载到/media目录下，故这里写/media
     const embyMountPath = '/media';
@@ -11,7 +11,7 @@ async function redirect2Pan(r) {
     const alistPwd = 'xxx';
 
     // 访问宿主机上5244端口的alist api
-    const alistApiPath = 'http://192.168.31.5:5244/api/public/path';
+    const alistApiPath = 'http://192.168.31.5:5244/api/fs/get';
 
     // 指定alist中目录名，这样会指定扫描该目录，若不写会扫描整个目录
     const alistPath = "AliYun"
@@ -25,7 +25,7 @@ async function redirect2Pan(r) {
     // infuse用户需要填写下面的api_key, 感谢@amwamw968
     if ((api_key === null) || (api_key === undefined)) {
         // 这里填自己的emby/jellyfin API KEY
-        api_key = 'xxx';
+        api_key = 'c5c5333a2e7c4cecbec55068172a5e4a';
         r.warn(`api key for Infuse: ${api_key}`);
     }
 
@@ -98,21 +98,20 @@ async function fetchAlistPathApi(alistApiPath, alistFilePath, alistPwd) {
             if (result === null || result === undefined) {
                 return `error: alist_path_api response is null`;
             }
-            if (result.message == 'success') {
-                if (result.data.type == 'file') {
-                    return result.data.files[0].url;
-                }
-                if (result.data.type == 'folder') {
+            if (result.message === 'success') {
+                if (result.data.is_dir) {
                     return result.data.files.map(item => item.name).join(',');
+                } else {
+                    return result.data.raw_url;
                 }
             }
-            if (result.code == 401) {
+            if (result.code === 401) {
                 return `error401: alist_path_api ${result.message}`;
             }
             if (result.message.includes('account')) {
                 return `error404: alist_path_api ${result.code} ${result.message}`;
             }
-            if (result.message == 'file not found' || result.message == 'path not found') {
+            if (result.message === 'file not found' || result.message === 'path not found') {
                 return `error404: alist_path_api ${result.message}`;
             }
             return `error: alist_path_api ${result.code} ${result.message}`;
